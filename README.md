@@ -6,7 +6,7 @@ sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -
 # Construir imagenes y ejecutar contenedores 
 
 ```
-cd docker/tortoisebot_ros2_docker
+cd tortoisebot_ros2_docker
 docker-compose up
 ```
 
