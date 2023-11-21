@@ -1,0 +1,47 @@
+# Start from ROS base image
+FROM ros:galactic-ros-base
+
+# Set the working directory
+WORKDIR /ros2_ws/src
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    ros-galactic-nav2-map-server \
+    ros-galactic-nav2-bringup \
+    ros-galactic-lifecycle \
+    ros-galactic-cartographer-ros && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download Tortoisebot repo
+RUN . /opt/ros/galactic/setup.sh && \
+    git clone -b ros2-galactic https://github.com/rigbetellabs/tortoisebot.git
+
+# Build your ROS packages
+RUN . /opt/ros/galactic/setup.sh && \
+    cd /ros2_ws && \
+    colcon build
+
+# Copy the navigation and mapping launch file
+COPY launch/navigation.launch.py /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/
+
+# Build again after copying the launch file
+RUN . /opt/ros/galactic/setup.sh && \
+    cd /ros2_ws && \
+    colcon build
+
+# Source the workspace every time a new shell is opened in the container
+RUN echo 'source /ros2_ws/install/setup.bash' >> ~/.bashrc
+
+# Set the working directory to root
+WORKDIR /
+
+# Copy the ROS SLAM entrypoint script
+COPY ros_slam_entrypoint.sh /
+
+# Provide execute permission to the entrypoint script
+RUN chmod +x ros_slam_entrypoint.sh 
+
+# Set the entry point to start a bash shell
+ENTRYPOINT ["/ros_slam_entrypoint.sh"]

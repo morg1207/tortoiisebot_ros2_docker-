@@ -1,0 +1,55 @@
+# Start from ROS base image
+FROM ros:galactic-ros-base
+
+# Set the working directory
+WORKDIR /
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    ros-galactic-joint-state-publisher \
+    ros-galactic-robot-state-publisher \
+    ros-galactic-gazebo-plugins \
+    ros-galactic-teleop-twist-keyboard \
+    ros-galactic-teleop-twist-joy \
+    ros-galactic-xacro \
+    ros-galactic-urdf \
+    software-properties-common \
+    ros-galactic-rviz2 \
+    python3-dev \
+    python3-rpi.gpio \
+    ros-galactic-rmw-cyclonedds-cpp \
+    && rm -rf /var/lib/apt/lists/*
+
+# Make a catkin workspace
+RUN mkdir -p /ros2_ws/src
+WORKDIR /ros2_ws/src
+
+# Download Tortoisebot repo
+RUN git clone -b ros2-galactic https://github.com/rigbetellabs/tortoisebot.git 
+
+# Build your ROS packages
+WORKDIR /ros2_ws
+RUN /bin/bash -c "source /opt/ros/galactic/setup.bash && colcon build"
+
+# Reemplazar el archivo bringup.py ya que no se dispone del raspicam
+RUN rm -rf /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/bringup.launch.py
+COPY launch/bringup.launch.py /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/
+
+# Build again after file replacement
+RUN /bin/bash -c "source /opt/ros/galactic/setup.bash && colcon build"
+
+# Install RealSense camera package
+RUN apt-get update && apt-get install -y \
+    ros-galactic-realsense2-camera \
+    ros-galactic-image-transport-plugins \
+    && rm -rf /var/lib/apt/lists/*
+
+# Source the workspace every time a new shell is opened in the container
+RUN echo source /ros2_ws/install/setup.bash >> ~/.bashrc
+
+# Set the entry point to start a bash shell
+WORKDIR /
+COPY ros_bringup_entrypoint.sh /
+RUN chmod +x ros_bringup_entrypoint.sh
+ENTRYPOINT ["/ros_bringup_entrypoint.sh"]
