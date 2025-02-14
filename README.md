@@ -31,7 +31,7 @@ git clone https://github.com/morg1207/tortoiisebot_ros2_docker-.git
 # Ejecuctar
 
 ```bash
-cd tortoisebot_ros2_docker-
+cd tortoiisebot_ros2_docker-
 sudo docker-compose up
 ```
 
