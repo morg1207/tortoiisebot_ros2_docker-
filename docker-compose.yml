@@ -7,7 +7,6 @@ services:
     build: 
       context: .
       dockerfile: dockerfile_tortoisebot-ros2-real
-    image: morg1207/morg1207-cp15:tortoisebot-ros2-real
     container_name: tortoisebot_ros2_real_cont
     network_mode: host
     privileged: true
@@ -25,20 +24,22 @@ services:
     volumes:
       # Me permite acceder a los recursos de la pantalla
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority:ro
       # Me permite acceder a los pines
       - /dev/gpiomem:/dev/gpiomem
     environment:
       - ROS_DOMAIN_ID=1
+      - DISPLAY
 
-  tortoisebot-ros2-slam-real:
+  #tortoisebot-ros2-slam-real:
     #image: morg1207/morg1207-cp15:tortoisebot-ros2-slam
-    build:    
-      context: .
-      dockerfile: dockerfile_tortoisebot-ros2-slam-real
-    image: morg1207/morg1207-cp15:tortoisebot-ros2-real-slam
-    container_name: tortoisebot_ros2_real_slam_cont
-    network_mode: host
-    environment:
-      - ROS_DOMAIN_ID=1
-    depends_on:
-      - tortoisebot-ros2-real
+  #  build:    
+  #    context: .
+  #    dockerfile: dockerfile_tortoisebot-ros2-slam-real
+  #  image: morg1207/morg1207-cp15:tortoisebot-ros2-real-slam
+  #  container_name: tortoisebot_ros2_real_slam_cont
+  #  network_mode: host
+  #  environment:
+  #    - ROS_DOMAIN_ID=1
+  #  depends_on:
+  #    - tortoisebot-ros2-real

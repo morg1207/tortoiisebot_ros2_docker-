@@ -13,9 +13,9 @@ from launch_ros.descriptions import ParameterValue
 def generate_launch_description():
   pkg_share = launch_ros.substitutions.FindPackageShare(package='tortoisebot_description').find('tortoisebot_description')
   rviz_launch_dir=os.path.join(get_package_share_directory('tortoisebot_description'), 'launch')
-  gazebo_launch_dir=os.path.join(get_package_share_directory('tortoisebot_gazebo'), 'launch')
-  ydlidar_launch_dir=os.path.join(get_package_share_directory('ydlidar'), 'launch')
-  default_model_path = os.path.join(pkg_share, 'models/urdf/tortoisebot.xacro')
+  #gazebo_launch_dir=os.path.join(get_package_share_directory('tortoisebot_gazebo'), 'launch')
+  ydlidar_launch_dir=os.path.join(get_package_share_directory('ydlidar_ros2_driver'), 'launch')
+  default_model_path = os.path.join(pkg_share, 'models/urdf/tortoisebot_simple.xacro')
   default_rviz_config_path = os.path.join(pkg_share, 'rviz/sensors.rviz')
   use_sim_time=LaunchConfiguration('use_sim_time')
   
@@ -33,17 +33,11 @@ def generate_launch_description():
             os.path.join(rviz_launch_dir, 'state_publisher.launch.py')),
             launch_arguments={'use_sim_time':use_sim_time}.items())
 
-  gazebo_launch_cmd=IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(gazebo_launch_dir, 'gazebo.launch.py')),
-            condition=IfCondition(use_sim_time),
-            launch_arguments={'use_sim_time':use_sim_time}.items())
-
-  ydlidar_launch_cmd=IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ydlidar_launch_dir, 'x2_ydlidar_launch.py')),
-            condition=IfCondition(PythonExpression(['not ', use_sim_time])),
-            launch_arguments={'use_sim_time':use_sim_time}.items())
+  #ydlidar_launch_cmd=IncludeLaunchDescription(
+  #      PythonLaunchDescriptionSource(
+  #          os.path.join(ydlidar_launch_dir, 'x2_ydlidar_launch.py')),
+  #          condition=IfCondition(PythonExpression(['not ', use_sim_time])),
+  #          launch_arguments={'use_sim_time':use_sim_time}.items())
   
   differential_drive_node = Node(
         package='tortoisebot_firmware',
@@ -51,12 +45,12 @@ def generate_launch_description():
         executable='differential.py',
         name ='differential_drive_publisher',
     )
-  camera_node = Node(
-      package='v4l2_camera',
-      condition=IfCondition(PythonExpression(['not ', use_sim_time])),
-      executable='v4l2_camera_node',
-      name ='camera1',
-    )
+  #camera_node = Node(
+      #package='v4l2_camera',
+      #condition=IfCondition(PythonExpression(['not ', use_sim_time])),
+      #executable='v4l2_camera_node',
+      #name ='camera1',
+    #)
   robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -83,9 +77,9 @@ def generate_launch_description():
     state_publisher_launch_cmd,
     robot_state_publisher_node,
     joint_state_publisher_node,
-    ydlidar_launch_cmd,
+    #ydlidar_launch_cmd,
     differential_drive_node,
-    gazebo_launch_cmd,
+    #gazebo_launch_cmd,
     #camera_node
 
   ]
