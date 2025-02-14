@@ -32,7 +32,7 @@ git clone https://github.com/morg1207/tortoiisebot_ros2_docker-.git
 
 ```bash
 cd tortoiisebot_ros2_docker-
-sudo docker-compose up
+sudo docker compose up
 ```
 
 ### Abrir un terminal
