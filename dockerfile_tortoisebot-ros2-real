@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     git \
     ros-humble-joint-state-publisher \
     ros-humble-robot-state-publisher \
-    #ros-humble-gazebo-plugins \
     ros-humble-teleop-twist-keyboard \
     ros-humble-teleop-twist-joy \
     ros-humble-xacro \
@@ -19,46 +18,42 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     python3-rpi.gpio \
     ros-humble-rmw-cyclonedds-cpp \
+    ros-humble-camera-info-manager \
     && rm -rf /var/lib/apt/lists/*
 
-# Make a catkin workspace
+# Create a ROS2 workspace
 RUN mkdir -p /ros2_ws/src
 WORKDIR /ros2_ws/src
 
 # Download Tortoisebot repo
 RUN git clone -b ros2-humble https://github.com/rigbetellabs/tortoisebot.git 
 
-# Install dependencies
-RUN apt-get update && apt-get install ros-humble-camera-info-manager -y
+# Remove unnecessary files (Raspberry Pi camera dependencies)
+RUN rm -rf /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/bringup.launch.py \
+           /ros2_ws/src/tortoisebot/tortoisebot_gazebo/ \
+           /ros2_ws/src/tortoisebot/v4l2_camera/
 
-
-# Reemplazar el archivo bringup.py ya que no se dispone del raspicam
-RUN rm -rf /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/bringup.launch.py /ros2_ws/src/tortoisebot/tortoisebot_gazebo/ /ros2_ws/src/tortoisebot/v4l2_camera/
-
-
+# Build YDLidar SDK
 WORKDIR /ros2_ws/src/tortoisebot 
 RUN cd YDLidar-SDK/build && cmake .. && make && sudo make install
 
-
-
-# Build your ROS packages
+# Build ROS2 packages
 WORKDIR /ros2_ws
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 1"
 
+# Replace bringup.launch.py
 COPY launch/bringup.launch.py /ros2_ws/src/tortoisebot/tortoisebot_bringup/launch/
 
+# Replace URDF file
 RUN rm -rf /ros2_ws/src/tortoisebot/tortoisebot_description/models/urdf/tortoisebot_simple.xacro
-
 COPY urdf/tortoisebot_simple.xacro /ros2_ws/src/tortoisebot/tortoisebot_description/models/urdf/tortoisebot_simple.xacro
 
+# Rebuild after modifications
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 1"
 
+# Source workspace in every shell session
+RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 
-# Source the workspace every time a new shell is opened in the container
-RUN echo source /ros2_ws/install/setup.bash >> ~/.bashrc
-
-# Set the entry point to start a bash shell
-WORKDIR /
+# Copy startup script (execution now handled in docker-compose)
 COPY ros_bringup_entrypoint.sh /
-RUN chmod +x ros_bringup_entrypoint.sh
-ENTRYPOINT ["/ros_bringup_entrypoint.sh"]
+RUN chmod +x /ros_bringup_entrypoint.sh

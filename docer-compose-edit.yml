@@ -11,7 +11,9 @@ services:
     privileged: true
     tty: true
     devices:
+      # lidar
       - /dev/ttyUSB0:/dev/ttyUSB0
+      # Camara
       - /dev/video0
       - /dev/video1
       - /dev/video2
@@ -19,12 +21,15 @@ services:
       - /dev/video4
       - /dev/video5
     volumes:
+      # Me permite acceder a los recursos de la pantalla
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/.Xauthority:/root/.Xauthority:ro
       - /var/lib/theconstruct.rrl/cyclonedds.xml:/var/lib/theconstruct.rrl/cyclonedds.xml
-      - /var/lib/theconstruct.rrl/fastdds_husarnet.xml:/var/lib/theconstruct.rrl/fastdds_husarnet.xml
+      # Me permite acceder a los pines
+
       - /dev/gpiomem:/dev/gpiomem
     environment:
+      #- ROS_DOMAIN_ID=1
       - DISPLAY
       - ROS_IPV6=on
       - ROS_MASTER_URI=http://master:11311
@@ -32,5 +37,17 @@ services:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - CYCLONEDDS_URI=file:///var/lib/theconstruct.rrl/cyclonedds.xml
       - FASTRTPS_DEFAULT_PROFILES_FILE=/var/lib/theconstruct.rrl/fastdds_husarnet.xml
-    command: ["/bin/bash", "-c", "/ros_bringup_entrypoint.sh"]
 
+
+  #tortoisebot-ros2-slam-real:
+    #image: morg1207/morg1207-cp15:tortoisebot-ros2-slam
+  #  build:    
+  #    context: .
+  #    dockerfile: dockerfile_tortoisebot-ros2-slam-real
+  #  image: morg1207/morg1207-cp15:tortoisebot-ros2-real-slam
+  #  container_name: tortoisebot_ros2_real_slam_cont
+  #  network_mode: host
+  #  environment:
+  #    - ROS_DOMAIN_ID=1
+  #  depends_on:
+  #    - tortoisebot-ros2-real

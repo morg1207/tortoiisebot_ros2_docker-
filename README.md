@@ -1,12 +1,15 @@
 # Docker tortoisebot ROS-HUMBLE
 
-### Actualizar hora  y fecha
 
-```
-sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z" 
+### 1  Instalar HUSARNET en tu máquina local o RASPBERRY
+
+Para esto solicitar el script de configuración al gestor de laboratorios.
+Ejemplo: 
+```bash
+bash <(curl https://app.theconstruct.ai/rrl-setup.sh) 2cdb5:5f2:794014ab0430462eb6598c4eaf571ae0vH0SEPP6wvBeok2nqzUqfNgd21uNONYgoY7eUHd8Fd
 ```
 
-### Instalar Docker 
+### 2 Instalar Docker 
 
 ```bash
 # Add Docker's official GPG key:
@@ -24,29 +27,22 @@ echo \
 sudo apt-get update
 ```
 
-### Clonar el repositorio
+### 3 Clonar el repositorio
 ```bash
 cd ~ 
-git clone https://github.com/morg1207/tortoiisebot_ros2_docker-.git
+git clone https://github.com/morg1207/tortoisebot-ros2-docker.git
 ```
-
-## Ejecctar
+### 4 Construir y ejecutar el contenedor
 
 ```bash
-cd tortoiisebot_ros2_docker-
+cd tortoisebot-ros2-docker
+sudo docker compose build
 sudo docker compose up
 ```
 
-### Abrir un terminal
+### 5 Abrir un terminal dentro del contenedor
 
 ```bash
 sudo docker exec -it tortoisebot_ros2_real_cont /bin/bash
 ```
 
-
-### Ejecutar en tu máquina local
-```bash
-echo "export ROS_DOMAIN_ID=1" >> ~/.bashrc
-source ~/.bashrc
-```
-ahora ya peudes ver los nodos desde tu máquina local
